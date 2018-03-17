@@ -16,4 +16,5 @@ void setup()
 void draw()
 {
   display.show();
+  sampler.updatePosition();
 }

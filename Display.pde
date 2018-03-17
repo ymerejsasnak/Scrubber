@@ -116,5 +116,18 @@ class Display
         sampler.load();
       }
     }
+   
+   else if (button == LEFT)
+   {
+     if (_mouseX > PADDING && _mouseX < PADDING + SAMPLE_WINDOW_WIDTH &&
+         _mouseY > PADDING && _mouseY < PADDING + SAMPLE_WINDOW_HEIGHT)
+     {
+       sampler.toggle(map(_mouseX, PADDING, PADDING + SAMPLE_WINDOW_WIDTH, 0, (float)sampler.getLength()));
+     }
+   }
+
   }
+  
+  
+  
 }

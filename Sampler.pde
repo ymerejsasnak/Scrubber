@@ -3,8 +3,16 @@ public class Sampler
   
   AudioContext ac;
   SamplePlayer sampler;
+  Glide positionUGen;
+  
   Sample loadedSample;
   String lastFolder;
+  boolean isPlaying = false;
+  
+  int smoothingMS = 200;
+  float changeFactor = .001;
+  
+  int direction = 1;
   
   
   Sampler()
@@ -103,6 +111,9 @@ public class Sampler
     if (sampler == null)
     {
       sampler = new SamplePlayer(ac, loadedSample); 
+      positionUGen = new Glide(ac, 0, smoothingMS);
+      sampler.setPosition(positionUGen);
+      sampler.setLoopType(SamplePlayer.LoopType.LOOP_FORWARDS);
       sampler.pause(true);
       sampler.setKillOnEnd(false);
       ac.out.addInput(sampler);
@@ -117,4 +128,55 @@ public class Sampler
     display.plotSample();
   }
   
+  
+  void toggle(float position)
+  {
+    if (isPlaying)
+    {
+      sampler.pause(true); 
+      isPlaying = false;
+    } 
+    
+    else if (isLoaded())
+    {
+      isPlaying = true;
+      sampler.start(); 
+      positionUGen.setValueImmediately(position);
+    }
+  }
+  
+  
+  void updatePosition()
+  {
+    perlinDirection();
+    if (isPlaying)
+    {
+      positionUGen.setValue((float)sampler.getPosition() + perlinSpeed() * direction); 
+        
+      if (sampler.getPosition() > getLength())
+      {
+        direction = -1; 
+      }
+      else if (sampler.getPosition() < 0)
+      {
+        direction = 1;
+      }
+    }
+  }
+  
+  
+  float perlinSpeed()
+  {
+    
+    return map(noise(millis() * changeFactor), 0, 1, 100, 235); 
+  }
+  
+  
+  void perlinDirection()
+  {
+    if (noise(millis() + 1000) >= .7)
+    {
+      direction = -direction; 
+    }
+  }
 }
