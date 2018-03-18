@@ -11,11 +11,17 @@ class Display
   final int INFO_BOX_Y = SAMPLE_WINDOW_HEIGHT + PADDING + 1;
   final int INFO_TEXT_Y = INFO_BOX_Y + INFO_BOX_HEIGHT / 2 + 5;
   
+  final int SLIDER_Y = INFO_BOX_HEIGHT + INFO_BOX_Y + PADDING * 2;
+  
   PGraphics samplePlot;
+  
+  Slider smoothSlider;
+  
   
   Display()
   {
     samplePlot = createGraphics(SAMPLE_WINDOW_WIDTH, SAMPLE_WINDOW_HEIGHT);
+    smoothSlider = new Slider(PADDING, SLIDER_Y, 0, 5, 500);
   }
   
   
@@ -70,6 +76,8 @@ class Display
     noStroke();
     rect(PADDING, INFO_BOX_Y, SAMPLE_WINDOW_WIDTH, INFO_BOX_HEIGHT);
     
+    smoothSlider.display();
+    
     if (sampler.isLoaded())
     {
       image(samplePlot, PADDING, PADDING);   
@@ -79,7 +87,7 @@ class Display
                                PADDING, PADDING + SAMPLE_WINDOW_WIDTH - 1);
       stroke(100);
       
-      int playPosDraw = min(playPos, PADDING + SAMPLE_WINDOW_WIDTH - 1); // stop it from going past end of window
+      int playPosDraw = constrain(playPos, 0, PADDING + SAMPLE_WINDOW_WIDTH - 1); // stop it from going past end of window
       
       line(playPosDraw, PADDING, playPosDraw, PADDING + SAMPLE_WINDOW_HEIGHT - 1);
             
@@ -105,7 +113,7 @@ class Display
   }
   
   
-  void clickCheck(int _mouseX, int _mouseY, int button)
+  void samplerClickCheck(int _mouseX, int _mouseY, int button)
   {
     if (button == RIGHT)
     {
@@ -122,7 +130,18 @@ class Display
      if (_mouseX > PADDING && _mouseX < PADDING + SAMPLE_WINDOW_WIDTH &&
          _mouseY > PADDING && _mouseY < PADDING + SAMPLE_WINDOW_HEIGHT)
      {
-       sampler.toggle(map(_mouseX, PADDING, PADDING + SAMPLE_WINDOW_WIDTH, 0, (float)sampler.getLength()));
+       sampler.scrubFromPosition(map(_mouseX, PADDING, PADDING + SAMPLE_WINDOW_WIDTH, 0, (float)sampler.getLength()));
+     }
+     
+     else if (smoothSlider.clickCheck(_mouseX, _mouseY))
+     {
+       smoothSlider.setPosition(_mouseY);
+       sampler.setSmoothing((int) smoothSlider.getValue()); 
+     }
+     
+     else
+     {
+       sampler.stopScrubbing(); 
      }
    }
 

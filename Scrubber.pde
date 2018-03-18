@@ -10,6 +10,7 @@ void setup()
   background(50);
   display = new Display();
   sampler = new Sampler();
+  ellipseMode(CENTER);
 }
 
 
@@ -17,4 +18,5 @@ void draw()
 {
   display.show();
   sampler.updatePosition();
+  sampler.updateVolume();
 }

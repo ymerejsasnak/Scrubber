@@ -4,6 +4,8 @@ public class Sampler
   AudioContext ac;
   SamplePlayer sampler;
   Glide positionUGen;
+  Glide volumeGlide;
+  Gain volumeUGen;
   
   Sample loadedSample;
   String lastFolder;
@@ -56,6 +58,13 @@ public class Sampler
   double getLength()
   {
     return loadedSample.getLength(); 
+  }
+  
+  
+  void setSmoothing(int smoothing)
+  {
+    smoothingMS = smoothing; 
+    positionUGen.setGlideTime(smoothingMS);
   }
   
   
@@ -112,11 +121,14 @@ public class Sampler
     {
       sampler = new SamplePlayer(ac, loadedSample); 
       positionUGen = new Glide(ac, 0, smoothingMS);
+      volumeGlide = new Glide(ac, 0, smoothingMS);
+      volumeUGen = new Gain(ac, 2, volumeGlide);
       sampler.setPosition(positionUGen);
       sampler.setLoopType(SamplePlayer.LoopType.LOOP_FORWARDS);
       sampler.pause(true);
       sampler.setKillOnEnd(false);
-      ac.out.addInput(sampler);
+      volumeUGen.addInput(sampler);
+      ac.out.addInput(volumeUGen);
     }
     else
     {
@@ -129,15 +141,9 @@ public class Sampler
   }
   
   
-  void toggle(float position)
-  {
-    if (isPlaying)
-    {
-      sampler.pause(true); 
-      isPlaying = false;
-    } 
-    
-    else if (isLoaded())
+  void scrubFromPosition(float position)
+  {    
+    if (isLoaded())
     {
       isPlaying = true;
       sampler.start(); 
@@ -146,9 +152,29 @@ public class Sampler
   }
   
   
+  void stopScrubbing()
+  {
+    if (isPlaying)
+    {
+      sampler.pause(true); 
+      isPlaying = false;
+    } 
+  }
+  
+  
+  void updateVolume()
+  {
+    if (isPlaying)
+    {
+      volumeGlide.setValue(1);//noise(millis() * changeFactor + 99));
+    }
+    
+  }
+  
+  
   void updatePosition()
   {
-    perlinDirection();
+    changeDirection();
     if (isPlaying)
     {
       positionUGen.setValue((float)sampler.getPosition() + perlinSpeed() * direction); 
@@ -172,7 +198,7 @@ public class Sampler
   }
   
   
-  void perlinDirection()
+  void changeDirection()
   {
     if (noise(millis() + 1000) >= .7)
     {
