@@ -8,11 +8,11 @@ class Slider
   float min, max;
   
   
-  Slider(int x, int y, int startPos, float min, float max)
+  Slider(int x, int y, float min, float max)
   {
     this.x = x;
     this.y = y;
-    position = startPos;
+    position = 0;
     this.min = min;
     this.max = max;
   }
@@ -39,12 +39,13 @@ class Slider
   void display()
   {
     fill(10);
-    rect(x, y, WIDTH, HEIGHT);
     stroke(100);
+    rect(x, y, WIDTH, HEIGHT, 10, 10, 10, 10);
     line(x + WIDTH / 2, y + WIDTH / 2, x + WIDTH / 2, y + HEIGHT - WIDTH / 2); 
     
     int controlPos = (int) map(position, 100, 0, y + WIDTH/2, y + HEIGHT - WIDTH/2);
-    fill(150);
-    ellipse(x + WIDTH / 2, controlPos, WIDTH / 2, WIDTH / 2);
+    fill(150, 150);
+    stroke(200);
+    ellipse(x + WIDTH / 2, controlPos, WIDTH - 4, WIDTH - 4);
   }
 }

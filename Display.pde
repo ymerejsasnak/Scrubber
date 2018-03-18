@@ -12,16 +12,19 @@ class Display
   final int INFO_TEXT_Y = INFO_BOX_Y + INFO_BOX_HEIGHT / 2 + 5;
   
   final int SLIDER_Y = INFO_BOX_HEIGHT + INFO_BOX_Y + PADDING * 2;
+  final int SLIDER_WIDTH = 50;
   
   PGraphics samplePlot;
   
-  Slider smoothSlider;
+  Slider smoothSlider, speedChangeSlider, directionChangeSlider;
   
   
   Display()
   {
     samplePlot = createGraphics(SAMPLE_WINDOW_WIDTH, SAMPLE_WINDOW_HEIGHT);
-    smoothSlider = new Slider(PADDING, SLIDER_Y, 0, 5, 500);
+    smoothSlider = new Slider(PADDING, SLIDER_Y, 500, 5);
+    speedChangeSlider = new Slider(PADDING * 2 + SLIDER_WIDTH, SLIDER_Y, .0001, .01);
+    directionChangeSlider = new Slider(PADDING * 3 + SLIDER_WIDTH * 2, SLIDER_Y, 1, 0);
   }
   
   
@@ -77,6 +80,8 @@ class Display
     rect(PADDING, INFO_BOX_Y, SAMPLE_WINDOW_WIDTH, INFO_BOX_HEIGHT);
     
     smoothSlider.display();
+    speedChangeSlider.display();
+    directionChangeSlider.display();
     
     if (sampler.isLoaded())
     {
@@ -137,6 +142,19 @@ class Display
      {
        smoothSlider.setPosition(_mouseY);
        sampler.setSmoothing((int) smoothSlider.getValue()); 
+     }
+     
+     else if (speedChangeSlider.clickCheck(_mouseX, _mouseY))
+     {
+       speedChangeSlider.setPosition(_mouseY);
+       sampler.setChangeFactor(speedChangeSlider.getValue());      
+     }
+     
+     else if (directionChangeSlider.clickCheck(_mouseX, _mouseY))
+     {
+       directionChangeSlider.setPosition(_mouseY);
+       sampler.setDirectionProbability(directionChangeSlider.getValue());
+       
      }
      
      else

@@ -11,8 +11,9 @@ public class Sampler
   String lastFolder;
   boolean isPlaying = false;
   
-  int smoothingMS = 200;
-  float changeFactor = .001;
+  int smoothingMS = 500;
+  float speedChangeFactor = 0.0001;
+  float directionChangeProbability = 0;
   
   int direction = 1;
   
@@ -68,6 +69,17 @@ public class Sampler
   }
   
   
+  void setChangeFactor(float factor)
+  {
+    speedChangeFactor = factor;
+  }
+  
+  
+  void setDirectionProbability(float prob)
+  {
+    directionChangeProbability = prob; 
+  }
+  
   float[] getMinMaxInFrames(float position, float numFrames)
   {
     float[][] frameData = new float[2][(int)numFrames];
@@ -121,7 +133,7 @@ public class Sampler
     {
       sampler = new SamplePlayer(ac, loadedSample); 
       positionUGen = new Glide(ac, 0, smoothingMS);
-      volumeGlide = new Glide(ac, 0, smoothingMS);
+      volumeGlide = new Glide(ac, 1, smoothingMS);
       volumeUGen = new Gain(ac, 2, volumeGlide);
       sampler.setPosition(positionUGen);
       sampler.setLoopType(SamplePlayer.LoopType.LOOP_FORWARDS);
@@ -166,7 +178,7 @@ public class Sampler
   {
     if (isPlaying)
     {
-      volumeGlide.setValue(1);//noise(millis() * changeFactor + 99));
+      volumeGlide.setValue(noise(millis() * speedChangeFactor + 99));
     }
     
   }
@@ -182,10 +194,12 @@ public class Sampler
       if (sampler.getPosition() > getLength())
       {
         direction = -1; 
+        positionUGen.setValueImmediately((float)getLength());
       }
       else if (sampler.getPosition() < 0)
       {
         direction = 1;
+        positionUGen.setValueImmediately(0);
       }
     }
   }
@@ -194,13 +208,13 @@ public class Sampler
   float perlinSpeed()
   {
     
-    return map(noise(millis() * changeFactor), 0, 1, 100, 235); 
+    return map(noise(millis() * speedChangeFactor), 0, 1, 100, 235); 
   }
   
   
   void changeDirection()
   {
-    if (noise(millis() + 1000) >= .7)
+    if (noise(millis() + 1000) <= directionChangeProbability)
     {
       direction = -direction; 
     }
